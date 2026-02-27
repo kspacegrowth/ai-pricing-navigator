@@ -3,6 +3,7 @@ import streamlit as st
 from modules.classifier import render_classifier
 from modules.value_mapper import render_value_mapper
 from modules.pricing_rec import render_pricing_rec
+from modules.health_check import render_health_check
 from modules.unit_economics import render_unit_economics
 
 st.set_page_config(
@@ -27,6 +28,7 @@ _defaults = {
     "pricing_recommendation": {},
     "pricing_formula": {},
     "health_scores": {},
+    "health_label": "",
     "overall_score": 0.0,
     "priority_areas": [],
 }
@@ -58,9 +60,23 @@ with st.sidebar:
 # Sidebar — unit economics calculator
 render_unit_economics()
 
-# Sidebar — footer
+# Sidebar — about + footer
 with st.sidebar:
     st.divider()
+
+    with st.expander("About this tool"):
+        st.markdown(
+            "AI Pricing Navigator helps AI founders design their pricing "
+            "strategy using frameworks from Bessemer Venture Partners\u2019 "
+            "AI Pricing Playbook. Answer questions about your business and "
+            "get a tailored pricing model recommendation."
+        )
+        st.markdown("This tool is free and does not store any data.")
+        st.markdown(
+            "[Read the full BVP playbook \u2192]"
+            "(https://www.bvp.com/atlas/the-ai-pricing-and-monetization-playbook)"
+        )
+
     st.markdown("[Built by K-Space](#)")
     st.caption(
         "Framework based on Bessemer Venture Partners\u2019 "
@@ -77,4 +93,14 @@ elif module == "2. Value Framework":
 elif module == "3. Pricing Recommendation":
     render_pricing_rec()
 elif module == "4. Health Check":
-    st.info("\U0001f6a7 Health Check Scorecard \u2014 coming in Phase 4")
+    render_health_check()
+
+# ---------------------------------------------------------------------------
+# Main area footer
+# ---------------------------------------------------------------------------
+st.divider()
+st.caption("Built by K-Space | AI-powered business development tools")
+st.caption(
+    "Framework based on Bessemer Venture Partners\u2019 "
+    "AI Pricing Playbook (2026)"
+)

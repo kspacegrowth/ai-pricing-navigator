@@ -104,3 +104,49 @@ def create_value_framework_chart(x_score, y_score):
     )
 
     return fig
+
+
+def create_radar_chart(scores, labels):
+    """Build a radar chart for health check scores.
+
+    Args:
+        scores: list of ints (1-5), one per axis
+        labels: list of axis label strings
+
+    Returns:
+        plotly Figure
+    """
+    # Close the polygon
+    r = list(scores) + [scores[0]]
+    theta = list(labels) + [labels[0]]
+
+    fig = go.Figure(
+        data=go.Scatterpolar(
+            r=r,
+            theta=theta,
+            fill="toself",
+            fillcolor="rgba(14, 165, 233, 0.2)",
+            line=dict(color="#0EA5E9", width=2),
+        )
+    )
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 5],
+                tickvals=[1, 2, 3, 4, 5],
+                tickfont=dict(size=10),
+            ),
+            angularaxis=dict(tickfont=dict(size=11)),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        showlegend=False,
+        height=420,
+        margin=dict(l=80, r=80, t=40, b=40),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#F8FAFC"),
+    )
+
+    return fig
