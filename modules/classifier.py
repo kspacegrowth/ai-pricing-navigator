@@ -1,4 +1,4 @@
-"""Module 1 — Business Model Classifier."""
+"""Module 1 - Business Model Classifier."""
 
 import streamlit as st
 import pandas as pd
@@ -72,7 +72,7 @@ def _show_results():
     st.divider()
 
     with st.container(border=True):
-        st.subheader(f"{icon} {model} \u2014 {confidence}% confidence")
+        st.subheader(f"{icon} {model} - {confidence}% confidence")
         st.markdown(model_data["description"])
         st.caption(model_data["pricing_implications"])
         with st.expander("See example companies"):

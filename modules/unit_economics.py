@@ -1,4 +1,4 @@
-"""Sidebar unit economics calculator \u2014 live-updating."""
+"""Sidebar unit economics calculator - live-updating."""
 
 import streamlit as st
 import plotly.graph_objects as go

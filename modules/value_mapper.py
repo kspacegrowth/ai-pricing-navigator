@@ -1,4 +1,4 @@
-"""Module 2 — Value Framework Mapper."""
+"""Module 2 - Value Framework Mapper."""
 
 import streamlit as st
 

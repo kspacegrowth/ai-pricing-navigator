@@ -1,4 +1,4 @@
-"""Module 3 \u2014 Pricing Model Recommender."""
+"""Module 3 - Pricing Model Recommender."""
 
 import streamlit as st
 import pandas as pd
@@ -25,7 +25,7 @@ _BVP_PRINCIPLES = {
         "**Cap your downside:** Use minimum commitments to protect against "
         "usage variance while keeping the outcome promise.",
         "**Build trust with transparency:** Show customers what the agent did "
-        "and how much it saved \u2014 this drives upsell.",
+        "and how much it saved - this drives upsell.",
     ],
     "AI-enabled Service": [
         "**Anchor to what you replace:** Your pricing ceiling is the cost of "
@@ -33,7 +33,7 @@ _BVP_PRINCIPLES = {
         "**Per-deliverable makes ROI obvious:** When customers pay per output, "
         "they can directly compare cost vs. the alternative.",
         "**Add SLA tiers for premium capture:** Speed, quality guarantees, and "
-        "dedicated support justify 2\u20133x pricing for enterprise.",
+        "dedicated support justify 2-3x pricing for enterprise.",
     ],
 }
 

@@ -10,7 +10,7 @@ from data.questions import QUESTIONS_BY_ID, MODULE_1_QUESTIONS, MODULE_2_QUESTIO
 
 
 # ---------------------------------------------------------------------------
-# Module 1 — Business Model Classifier
+# Module 1 - Business Model Classifier
 # ---------------------------------------------------------------------------
 
 def classify_business_model(answers):
@@ -50,7 +50,7 @@ def classify_business_model(answers):
 
 
 # ---------------------------------------------------------------------------
-# Module 2 — Value Framework Mapper
+# Module 2 - Value Framework Mapper
 # ---------------------------------------------------------------------------
 
 def calculate_value_position(answers):
@@ -97,7 +97,7 @@ def calculate_value_position(answers):
 
 
 # ---------------------------------------------------------------------------
-# Module 3 — Pricing Formula Generator (4 variants)
+# Module 3 - Pricing Formula Generator (4 variants)
 # ---------------------------------------------------------------------------
 
 def _get_monthly_units(deal_size):
@@ -261,7 +261,7 @@ def generate_pricing_formula(cost_per_unit, target_margin, deal_size,
 
 
 # ---------------------------------------------------------------------------
-# Module 4 — Health Check Scorer
+# Module 4 - Health Check Scorer
 # ---------------------------------------------------------------------------
 
 def calculate_health_score(scores):

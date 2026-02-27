@@ -30,22 +30,22 @@ def create_value_framework_chart(x_score, y_score):
 
     # Quadrant background rectangles
     quadrant_shapes = [
-        # Revenue Engine — top-right (green)
+        # Revenue Engine - top-right (green)
         dict(
             type="rect", x0=0, x1=1.3, y0=0, y1=1.3,
             fillcolor="rgba(34, 197, 94, 0.10)", line=dict(width=0), layer="below",
         ),
-        # Efficiency Machine — top-left (blue)
+        # Efficiency Machine - top-left (blue)
         dict(
             type="rect", x0=-1.3, x1=0, y0=0, y1=1.3,
             fillcolor="rgba(59, 130, 246, 0.10)", line=dict(width=0), layer="below",
         ),
-        # Promise Zone — bottom-right (yellow)
+        # Promise Zone - bottom-right (yellow)
         dict(
             type="rect", x0=0, x1=1.3, y0=-1.3, y1=0,
             fillcolor="rgba(234, 179, 8, 0.10)", line=dict(width=0), layer="below",
         ),
-        # Danger Zone — bottom-left (red)
+        # Danger Zone - bottom-left (red)
         dict(
             type="rect", x0=-1.3, x1=0, y0=-1.3, y1=0,
             fillcolor="rgba(239, 68, 68, 0.10)", line=dict(width=0), layer="below",

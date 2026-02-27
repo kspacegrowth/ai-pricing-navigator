@@ -1,4 +1,4 @@
-"""Module 4 \u2014 Pricing Strategy Health Check."""
+"""Module 4 - Pricing Strategy Health Check."""
 
 import streamlit as st
 
@@ -14,10 +14,10 @@ _RADAR_LABELS = [
 ]
 
 _SCORE_BADGES = {
-    "Early Stage": "\U0001f534 Early Stage \u2014 Focus on the fundamentals before scaling",
-    "Developing": "\U0001f7e1 Developing \u2014 Good foundation, key gaps to address",
-    "Strong": "\U0001f7e2 Strong \u2014 Well-positioned, fine-tune the details",
-    "Advanced": "\U0001f31f Advanced \u2014 Pricing is a competitive advantage",
+    "Early Stage": "\U0001f534 Early Stage - Focus on the fundamentals before scaling",
+    "Developing": "\U0001f7e1 Developing - Good foundation, key gaps to address",
+    "Strong": "\U0001f7e2 Strong - Well-positioned, fine-tune the details",
+    "Advanced": "\U0001f31f Advanced - Pricing is a competitive advantage",
 }
 
 
@@ -25,7 +25,7 @@ def render_health_check():
     st.header("Pricing Strategy Health Check")
     st.markdown(
         "Rate your confidence on each of these critical pricing dimensions. "
-        "Be honest \u2014 this tool is most useful when you are."
+        "Be honest - this tool is most useful when you are."
     )
     st.caption("(1 = not at all confident, 5 = fully confident)")
 

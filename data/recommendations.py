@@ -9,9 +9,9 @@ BUSINESS_MODELS = {
             "how many people adopt the tool across an organization."
         ),
         "examples": [
-            "GitHub Copilot \u2014 AI pair programmer that suggests code in-editor",
-            "Grammarly \u2014 AI writing assistant that improves text as you type",
-            "Notion AI \u2014 drafts, summarizes, and edits within the user's workflow",
+            "GitHub Copilot - AI pair programmer that suggests code in-editor",
+            "Grammarly - AI writing assistant that improves text as you type",
+            "Notion AI - drafts, summarizes, and edits within the user's workflow",
         ],
         "pricing_implications": (
             "Per-seat pricing works well because value is tied to individual users. "
@@ -26,9 +26,9 @@ BUSINESS_MODELS = {
             "measured in outcomes delivered, not time spent using the product."
         ),
         "examples": [
-            "Intercom Fin \u2014 AI agent that resolves customer support tickets autonomously",
-            "Devin \u2014 AI software engineer that completes coding tasks end-to-end",
-            "Resolve AI \u2014 autonomous incident response and uptime management",
+            "Intercom Fin - AI agent that resolves customer support tickets autonomously",
+            "Devin - AI software engineer that completes coding tasks end-to-end",
+            "Resolve AI - autonomous incident response and uptime management",
         ],
         "pricing_implications": (
             "Outcome-based or per-task pricing aligns cost with value delivered. "
@@ -43,9 +43,9 @@ BUSINESS_MODELS = {
             "Customers evaluate you against the cost of the service you replace."
         ),
         "examples": [
-            "EvenUp \u2014 AI-generated legal demand packages replacing paralegal work",
-            "Pepper Content \u2014 AI content creation replacing freelance writers",
-            "Jasper \u2014 AI marketing content replacing agency copywriting",
+            "EvenUp - AI-generated legal demand packages replacing paralegal work",
+            "Pepper Content - AI content creation replacing freelance writers",
+            "Jasper - AI marketing content replacing agency copywriting",
         ],
         "pricing_implications": (
             "Price anchored to the cost of the service you replace, typically at a "
@@ -95,7 +95,7 @@ QUADRANTS = {
         "label": "Danger Zone",
         "description": (
             "Your product saves costs but the ROI is hard to prove. This is the "
-            "hardest position to price from \u2014 you're competing for budget without "
+            "hardest position to price from - you're competing for budget without "
             "concrete evidence of impact."
         ),
         "pricing_implication": (
@@ -209,7 +209,7 @@ HEALTH_CHECK_ACTIONS = {
         "is delivered and how you charge is the #1 cause of pricing friction."
     ),
     "m4_q3": (
-        "Simplify your pricing page to pass the '5-second test' \u2014 can a first-time "
+        "Simplify your pricing page to pass the '5-second test' - can a first-time "
         "visitor understand what they'll pay? Consider removing usage dimensions that "
         "require explanation and anchoring on a metric your buyer already tracks."
     ),
@@ -236,7 +236,7 @@ HEALTH_CHECK_ACTIONS = {
     "m4_q8": (
         "If you and competitors use similar foundation models, your pricing differentiation "
         "must come from proprietary data, fine-tuning, workflow integration, or domain "
-        "expertise \u2014 not the AI itself. Price the outcome, not the model."
+        "expertise - not the AI itself. Price the outcome, not the model."
     ),
     "m4_q9": (
         "Stress-test your pricing against 3 scenarios: inference costs increase 2x, "

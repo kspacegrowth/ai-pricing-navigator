@@ -37,7 +37,7 @@ for _k, _v in _defaults.items():
         st.session_state[_k] = _v
 
 # ---------------------------------------------------------------------------
-# Sidebar — navigation
+# Sidebar - navigation
 # ---------------------------------------------------------------------------
 with st.sidebar:
     st.header("\U0001f4b0 AI Pricing Navigator")
@@ -57,10 +57,10 @@ with st.sidebar:
 
     st.divider()
 
-# Sidebar — unit economics calculator
+# Sidebar - unit economics calculator
 render_unit_economics()
 
-# Sidebar — about + footer
+# Sidebar - about + footer
 with st.sidebar:
     st.divider()
 
