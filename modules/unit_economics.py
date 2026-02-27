@@ -7,6 +7,10 @@ import plotly.graph_objects as go
 def render_unit_economics():
     """Render the compact unit economics calculator in the sidebar."""
     st.sidebar.subheader("\U0001f4b9 Unit Economics Calculator")
+    st.sidebar.caption(
+        "A quick scratch pad to test your margin math. "
+        "Use anytime - it\u2019s independent of the steps above."
+    )
 
     cost = st.sidebar.number_input(
         "Cost per unit ($)", min_value=0.01, value=1.00, step=0.25,
@@ -34,6 +38,11 @@ def render_unit_economics():
     st.sidebar.metric("Gross Margin", f"{margin:.0f}%")
     st.sidebar.metric("Monthly Profit/Customer", f"${profit_per_cust:,.0f}")
     st.sidebar.metric("Monthly Total Profit", f"${total_profit:,.0f}")
+
+    st.sidebar.caption(
+        "Benchmark: SaaS companies target 80%+ gross margins. "
+        "AI companies typically run 50-65%."
+    )
 
     # ---- Benchmark bar chart ----------------------------------------------
     if margin > 65:

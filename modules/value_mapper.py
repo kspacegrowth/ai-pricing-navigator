@@ -30,20 +30,33 @@ def render_value_mapper():
         "strongest pricing."
     )
 
-    if not st.session_state.business_model:
+    # ---- Progress summary -------------------------------------------------
+    if st.session_state.business_model:
+        st.caption(
+            f"\u2705 Step 1 Complete: Classified as "
+            f"**{st.session_state.business_model}** "
+            f"({st.session_state.model_confidence:.0f}% confidence)"
+        )
+    else:
         st.warning(
             "Complete Step 1 first to get the most accurate results."
         )
 
     # ---- Questions --------------------------------------------------------
     for q in MODULE_2_QUESTIONS:
-        st.radio(
+        selected = st.radio(
             q["text"],
             options=[opt["label"] for opt in q["options"]],
             key=f"radio_{q['id']}",
             index=None,
             help=q["help_text"],
         )
+        # Show example for the selected option
+        if selected and q.get("options"):
+            for opt in q["options"]:
+                if opt["label"] == selected and opt.get("example"):
+                    st.caption(f"*{opt['example']}*")
+                    break
 
     # ---- Map button -------------------------------------------------------
     if st.button("Map My Position \u2192", type="primary"):

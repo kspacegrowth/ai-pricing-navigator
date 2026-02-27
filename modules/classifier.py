@@ -39,13 +39,19 @@ def render_classifier():
 
     # ---- Questions --------------------------------------------------------
     for q in MODULE_1_QUESTIONS:
-        st.radio(
+        selected = st.radio(
             q["text"],
             options=[opt["label"] for opt in q["options"]],
             key=f"radio_{q['id']}",
             index=None,
             help=q["help_text"],
         )
+        # Show example for the selected option
+        if selected and q.get("options"):
+            for opt in q["options"]:
+                if opt["label"] == selected and opt.get("example"):
+                    st.caption(f"*{opt['example']}*")
+                    break
 
     # ---- Classify button --------------------------------------------------
     if st.button("Classify My Business \u2192", type="primary"):

@@ -31,10 +31,19 @@ _defaults = {
     "health_label": "",
     "overall_score": 0.0,
     "priority_areas": [],
+    "confirm_reset": False,
 }
 for _k, _v in _defaults.items():
     if _k not in st.session_state:
         st.session_state[_k] = _v
+
+_NAV_OPTIONS = [
+    "\U0001f3e0 Welcome",
+    "1. Classify Business",
+    "2. Map Value",
+    "3. Pricing Model",
+    "4. Health Check",
+]
 
 # ---------------------------------------------------------------------------
 # Sidebar - navigation
@@ -46,14 +55,28 @@ with st.sidebar:
 
     module = st.radio(
         "Navigate",
-        [
-            "1. Business Model",
-            "2. Value Framework",
-            "3. Pricing Recommendation",
-            "4. Health Check",
-        ],
+        _NAV_OPTIONS,
+        key="nav_module",
         label_visibility="collapsed",
     )
+
+    st.divider()
+
+    # Reset button
+    if st.button("\U0001f504 Start Over"):
+        st.session_state.confirm_reset = True
+
+    if st.session_state.confirm_reset:
+        st.warning("This will clear all your answers.")
+        c1, c2 = st.columns(2)
+        if c1.button("Yes, reset"):
+            keys = [k for k in st.session_state.keys()]
+            for k in keys:
+                del st.session_state[k]
+            st.rerun()
+        if c2.button("Cancel"):
+            st.session_state.confirm_reset = False
+            st.rerun()
 
     st.divider()
 
@@ -83,14 +106,54 @@ with st.sidebar:
         "AI Pricing Playbook (2026)"
     )
 
+
+# ---------------------------------------------------------------------------
+# Welcome page
+# ---------------------------------------------------------------------------
+def _render_welcome():
+    st.title("AI Pricing Navigator")
+    st.markdown("### Design your AI pricing strategy in minutes - not months.")
+    st.markdown(
+        "This tool walks you through a 3-step process to help you choose the "
+        "right pricing model for your AI product. You\u2019ll classify your "
+        "business, map your value, and get a concrete pricing recommendation "
+        "with real numbers."
+    )
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        with st.container(border=True):
+            st.markdown("\U0001f50d **Step 1: Classify**")
+            st.caption("What type of AI business are you?")
+    with c2:
+        with st.container(border=True):
+            st.markdown("\U0001f4ca **Step 2: Map Value**")
+            st.caption("Where\u2019s your pricing power?")
+    with c3:
+        with st.container(border=True):
+            st.markdown("\U0001f4b0 **Step 3: Get Your Model**")
+            st.caption("Concrete pricing formula")
+
+    st.markdown(
+        "**Plus:** Take the Pricing Health Check - a standalone self-assessment "
+        "to find blind spots in your pricing strategy."
+    )
+
+    if st.button("Get Started \u2192", type="primary"):
+        st.session_state.nav_module = "1. Classify Business"
+        st.rerun()
+
+
 # ---------------------------------------------------------------------------
 # Module routing
 # ---------------------------------------------------------------------------
-if module == "1. Business Model":
+if module == "\U0001f3e0 Welcome":
+    _render_welcome()
+elif module == "1. Classify Business":
     render_classifier()
-elif module == "2. Value Framework":
+elif module == "2. Map Value":
     render_value_mapper()
-elif module == "3. Pricing Recommendation":
+elif module == "3. Pricing Model":
     render_pricing_rec()
 elif module == "4. Health Check":
     render_health_check()
