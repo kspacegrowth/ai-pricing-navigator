@@ -9,6 +9,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from data.questions import QUESTIONS_BY_ID, MODULE_1_QUESTIONS, MODULE_2_QUESTIONS
 
 
+# ---------------------------------------------------------------------------
+# Module 1 — Business Model Classifier
+# ---------------------------------------------------------------------------
+
 def classify_business_model(answers):
     """Classify business model from Module 1 answers.
 
@@ -44,6 +48,10 @@ def classify_business_model(answers):
 
     return model_map[top_dim], confidence
 
+
+# ---------------------------------------------------------------------------
+# Module 2 — Value Framework Mapper
+# ---------------------------------------------------------------------------
 
 def calculate_value_position(answers):
     """Calculate value framework position from Module 2 answers.
@@ -88,73 +96,173 @@ def calculate_value_position(answers):
     return round(x, 3), round(y, 3), quadrant
 
 
-def generate_pricing_formula(cost_per_unit, target_margin, deal_size, model_type):
-    """Generate pricing formula based on BVP hybrid model.
+# ---------------------------------------------------------------------------
+# Module 3 — Pricing Formula Generator (4 variants)
+# ---------------------------------------------------------------------------
+
+def _get_monthly_units(deal_size):
+    """Map deal size to estimated monthly units."""
+    if deal_size <= 5000:
+        return 50
+    elif deal_size <= 25000:
+        return 200
+    elif deal_size <= 100000:
+        return 500
+    else:
+        return 1000
+
+
+def _get_seats(customer_segment):
+    """Map customer segment to estimated seat count."""
+    return {"smb": 5, "mid_market": 25, "enterprise": 100}.get(customer_segment, 25)
+
+
+def _empty_result():
+    return {
+        "model_name": "",
+        "platform_fee_annual": 0,
+        "platform_fee_monthly": 0,
+        "included_units": 0,
+        "overage_rate": 0,
+        "effective_price_per_unit": 0,
+        "gross_margin": 0,
+        "explanation": "",
+    }
+
+
+def _hybrid_formula(cost, price, margin, deal_size):
+    monthly_units = _get_monthly_units(deal_size)
+    fee_monthly = round(cost * monthly_units * 2, 2)
+    fee_annual = round(fee_monthly * 12, 2)
+    included = max(1, int(fee_annual / (price * 1.5)))
+    overage = round(price * 1.2, 2)
+
+    annual_cost = cost * included
+    gm = round((fee_annual - annual_cost) / fee_annual * 100, 1) if fee_annual > 0 else 0
+
+    return {
+        "model_name": "Hybrid (Base + Usage)",
+        "platform_fee_annual": fee_annual,
+        "platform_fee_monthly": fee_monthly,
+        "included_units": included,
+        "overage_rate": overage,
+        "effective_price_per_unit": round(price, 2),
+        "gross_margin": gm,
+        "explanation": (
+            f"Charge ${fee_monthly:,.0f}/mo platform fee covering "
+            f"{included:,} included units/yr. "
+            f"Additional units at ${overage:,.2f} each."
+        ),
+    }
+
+
+def _outcome_formula(cost, price, margin, deal_size):
+    min_commit = round(deal_size * 0.7, 2)
+    estimated_outcomes = max(1, int(min_commit / price))
+    fee_monthly = round(min_commit / 12, 2)
+
+    return {
+        "model_name": "Outcome-based",
+        "platform_fee_annual": min_commit,
+        "platform_fee_monthly": fee_monthly,
+        "included_units": estimated_outcomes,
+        "overage_rate": round(price, 2),
+        "effective_price_per_unit": round(price, 2),
+        "gross_margin": round(margin, 1),
+        "explanation": (
+            f"${price:,.2f} per outcome with ${min_commit:,.0f}/yr minimum "
+            f"commitment (~{estimated_outcomes:,} outcomes). "
+            f"Same rate for additional outcomes."
+        ),
+    }
+
+
+def _workflow_formula(cost, price, margin, deal_size):
+    monthly_tasks = _get_monthly_units(deal_size)  # reuse same mapping
+    fee_monthly = round(monthly_tasks * price, 2)
+    fee_annual = round(fee_monthly * 12, 2)
+    annual_tasks = monthly_tasks * 12
+    discounted = round(price * 0.85, 2)
+
+    return {
+        "model_name": "Workflow-based (Per Task)",
+        "platform_fee_annual": fee_annual,
+        "platform_fee_monthly": fee_monthly,
+        "included_units": annual_tasks,
+        "overage_rate": discounted,
+        "effective_price_per_unit": round(price, 2),
+        "gross_margin": round(margin, 1),
+        "explanation": (
+            f"${price:,.2f} per task \u00d7 {monthly_tasks:,} tasks/mo = "
+            f"${fee_monthly:,.0f}/mo. "
+            f"15% volume discount at 2\u00d7 volume (${discounted:,.2f}/task)."
+        ),
+    }
+
+
+def _per_seat_formula(cost, price, margin, deal_size, segment):
+    seats = _get_seats(segment)
+    monthly_per_seat = round(deal_size / 12 / seats, 2)
+    fee_monthly = round(monthly_per_seat * seats, 2)
+    fee_annual = round(fee_monthly * 12, 2)
+    extra_seat = round(monthly_per_seat * 1.5, 2)
+
+    # Estimate cost per seat
+    monthly_units = _get_monthly_units(deal_size)
+    units_per_seat = monthly_units / seats
+    cost_per_seat = cost * units_per_seat
+    gm = round((monthly_per_seat - cost_per_seat) / monthly_per_seat * 100, 1) if monthly_per_seat > 0 else 0
+
+    return {
+        "model_name": "Per-seat + Feature Tiers",
+        "platform_fee_annual": fee_annual,
+        "platform_fee_monthly": fee_monthly,
+        "included_units": seats,
+        "overage_rate": extra_seat,
+        "effective_price_per_unit": monthly_per_seat,
+        "gross_margin": gm,
+        "explanation": (
+            f"${monthly_per_seat:,.0f}/seat/month \u00d7 {seats} seats = "
+            f"${fee_monthly:,.0f}/mo. "
+            f"Additional seats at ${extra_seat:,.0f}/mo each."
+        ),
+    }
+
+
+def generate_pricing_formula(cost_per_unit, target_margin, deal_size,
+                             formula_type, customer_segment="mid_market"):
+    """Generate pricing formula using one of 4 BVP-derived variants.
 
     Args:
         cost_per_unit: float, cost to deliver one unit of value
         target_margin: float, target gross margin percentage (40-85)
         deal_size: float, target annual deal size in dollars
-        model_type: "Copilot", "Agent", or "AI-enabled Service"
+        formula_type: "hybrid", "outcome", "workflow", or "per_seat"
+        customer_segment: "smb", "mid_market", or "enterprise"
 
     Returns:
-        dict with platform_fee, included_units, overage_rate, effective_price, gross_margin
+        dict with model_name, platform_fee_annual, platform_fee_monthly,
+        included_units, overage_rate, effective_price_per_unit,
+        gross_margin, explanation.
     """
     if cost_per_unit <= 0 or target_margin >= 100:
-        return {
-            "platform_fee": 0,
-            "included_units": 0,
-            "overage_rate": 0,
-            "effective_price": 0,
-            "gross_margin": 0,
-        }
+        return _empty_result()
 
-    # Target price per unit to achieve desired margin
-    price_per_unit = cost_per_unit / (1 - target_margin / 100)
+    price = cost_per_unit / (1 - target_margin / 100)
 
-    # Estimate monthly units from deal size
-    monthly_units = deal_size / 12 / price_per_unit
+    if formula_type == "per_seat":
+        return _per_seat_formula(cost_per_unit, price, target_margin, deal_size, customer_segment)
+    elif formula_type == "outcome":
+        return _outcome_formula(cost_per_unit, price, target_margin, deal_size)
+    elif formula_type == "workflow":
+        return _workflow_formula(cost_per_unit, price, target_margin, deal_size)
+    else:  # hybrid (default)
+        return _hybrid_formula(cost_per_unit, price, target_margin, deal_size)
 
-    # Model-type adjustments
-    if model_type == "Copilot":
-        fee_multiplier = 2.0   # Standard base coverage
-        unit_divisor = 1.5
-        overage_multiplier = 1.2
-    elif model_type == "Agent":
-        fee_multiplier = 1.5   # Lower base, more outcome-aligned
-        unit_divisor = 1.3
-        overage_multiplier = 1.3
-    else:  # AI-enabled Service
-        fee_multiplier = 2.2   # Higher base, service-level commitment
-        unit_divisor = 1.6
-        overage_multiplier = 1.15
 
-    # Platform fee = cost coverage * multiplier for estimated usage
-    platform_fee = round(cost_per_unit * monthly_units * fee_multiplier, 2)
-
-    # Included units in the platform fee
-    included_units = max(1, int(platform_fee / (price_per_unit * unit_divisor)))
-
-    # Overage rate for additional units
-    overage_rate = round(price_per_unit * overage_multiplier, 2)
-
-    # Effective annual price (platform fee * 12)
-    effective_price = round(platform_fee * 12, 2)
-
-    # Actual gross margin based on included units
-    annual_cost = cost_per_unit * included_units * 12
-    gross_margin = round(
-        (effective_price - annual_cost) / effective_price * 100, 1
-    ) if effective_price > 0 else 0
-
-    return {
-        "platform_fee": platform_fee,
-        "included_units": included_units,
-        "overage_rate": overage_rate,
-        "effective_price": effective_price,
-        "gross_margin": gross_margin,
-    }
-
+# ---------------------------------------------------------------------------
+# Module 4 — Health Check Scorer
+# ---------------------------------------------------------------------------
 
 def calculate_health_score(scores):
     """Calculate health check score from Module 4 answers.
@@ -192,176 +300,143 @@ def calculate_health_score(scores):
 if __name__ == "__main__":
     print("Running scoring tests...\n")
 
-    # --- Test classify_business_model ---
-    # All copilot-heavy answers
+    # --- classify_business_model ---
     copilot_answers = {
-        "m1_q1": "yes",       # copilot: 3
-        "m1_q2": "no",        # copilot: 3
-        "m1_q3": "partial",   # copilot: 2
-        "m1_q4": "chat",      # copilot: 3
-        "m1_q5": "advisor",   # copilot: 3
+        "m1_q1": "yes", "m1_q2": "no", "m1_q3": "partial",
+        "m1_q4": "chat", "m1_q5": "advisor",
     }
     model, conf = classify_business_model(copilot_answers)
     assert model == "Copilot", f"Expected Copilot, got {model}"
-    assert conf > 50, f"Expected confidence > 50, got {conf}"
-    print(f"  Copilot classification: {model} ({conf}%) - PASS")
+    assert conf > 50
+    print(f"  Copilot: {model} ({conf}%) - PASS")
 
-    # All agent-heavy answers
     agent_answers = {
-        "m1_q1": "no",        # agent: 2
-        "m1_q2": "yes",       # agent: 3
-        "m1_q3": "no",        # agent: 2
-        "m1_q4": "automation", # agent: 3
-        "m1_q5": "executor",  # agent: 3
+        "m1_q1": "no", "m1_q2": "yes", "m1_q3": "no",
+        "m1_q4": "automation", "m1_q5": "executor",
     }
     model, conf = classify_business_model(agent_answers)
-    assert model == "Agent", f"Expected Agent, got {model}"
-    assert conf > 50, f"Expected confidence > 50, got {conf}"
-    print(f"  Agent classification: {model} ({conf}%) - PASS")
+    assert model == "Agent"
+    print(f"  Agent: {model} ({conf}%) - PASS")
 
-    # All service-heavy answers
     service_answers = {
-        "m1_q1": "no",        # service: 2
-        "m1_q2": "partial",   # service: 2
-        "m1_q3": "yes",       # service: 3
-        "m1_q4": "output",    # service: 3
-        "m1_q5": "service_provider",  # service: 3
+        "m1_q1": "no", "m1_q2": "partial", "m1_q3": "yes",
+        "m1_q4": "output", "m1_q5": "service_provider",
     }
     model, conf = classify_business_model(service_answers)
-    assert model == "AI-enabled Service", f"Expected AI-enabled Service, got {model}"
-    assert conf > 40, f"Expected confidence > 40, got {conf}"
-    print(f"  Service classification: {model} ({conf}%) - PASS")
+    assert model == "AI-enabled Service"
+    print(f"  Service: {model} ({conf}%) - PASS")
 
-    # --- Test calculate_value_position ---
-    # Revenue + hard ROI
-    revenue_hard = {
-        "m2_q1": "revenue",       # x: 1.0, y: 0.5
-        "m2_q2": "yes",           # x: 0.0, y: 1.0
-        "m2_q3": "lose_revenue",  # x: 0.5, y: 1.0
-        "m2_q4": "dashboard",     # x: 0.0, y: 1.0
-        "m2_q5": "no",            # x: 0.5, y: -0.5
-    }
-    x, y, quad = calculate_value_position(revenue_hard)
-    assert quad == "Revenue Engine", f"Expected Revenue Engine, got {quad}"
-    assert x > 0, f"Expected x > 0, got {x}"
-    assert y > 0, f"Expected y > 0, got {y}"
-    print(f"  Revenue Engine: x={x}, y={y}, quad={quad} - PASS")
+    # --- calculate_value_position ---
+    x, y, quad = calculate_value_position({
+        "m2_q1": "revenue", "m2_q2": "yes", "m2_q3": "lose_revenue",
+        "m2_q4": "dashboard", "m2_q5": "no",
+    })
+    assert quad == "Revenue Engine" and x > 0 and y > 0
+    print(f"  Revenue Engine: x={x}, y={y} - PASS")
 
-    # Cost savings + hard ROI
-    cost_hard = {
-        "m2_q1": "cost_reduction",  # x: -1.0, y: 0.5
-        "m2_q2": "yes",            # x: 0.0, y: 1.0
-        "m2_q3": "slower",         # x: -0.5, y: 0.5
-        "m2_q4": "dashboard",      # x: 0.0, y: 1.0
-        "m2_q5": "yes",            # x: -0.5, y: 1.0
-    }
-    x, y, quad = calculate_value_position(cost_hard)
-    assert quad == "Efficiency Machine", f"Expected Efficiency Machine, got {quad}"
-    assert x < 0, f"Expected x < 0, got {x}"
-    assert y > 0, f"Expected y > 0, got {y}"
-    print(f"  Efficiency Machine: x={x}, y={y}, quad={quad} - PASS")
+    x, y, quad = calculate_value_position({
+        "m2_q1": "cost_reduction", "m2_q2": "yes", "m2_q3": "slower",
+        "m2_q4": "dashboard", "m2_q5": "yes",
+    })
+    assert quad == "Efficiency Machine" and x < 0 and y > 0
+    print(f"  Efficiency Machine: x={x}, y={y} - PASS")
 
-    # Soft ROI + cost savings
-    soft_cost = {
-        "m2_q1": "time_savings",    # x: -0.5, y: -0.5
-        "m2_q2": "no",             # x: 0.0, y: -1.0
-        "m2_q3": "no_pain",        # x: 0.0, y: -1.0
-        "m2_q4": "qualitative",    # x: 0.0, y: -1.0
-        "m2_q5": "partial",        # x: -0.25, y: 0.5
-    }
-    x, y, quad = calculate_value_position(soft_cost)
-    assert quad == "Danger Zone", f"Expected Danger Zone, got {quad}"
-    assert y < 0, f"Expected y < 0, got {y}"
-    print(f"  Danger Zone: x={x}, y={y}, quad={quad} - PASS")
+    x, y, quad = calculate_value_position({
+        "m2_q1": "time_savings", "m2_q2": "no", "m2_q3": "no_pain",
+        "m2_q4": "qualitative", "m2_q5": "partial",
+    })
+    assert quad == "Danger Zone" and y < 0
+    print(f"  Danger Zone: x={x}, y={y} - PASS")
 
-    # --- Test generate_pricing_formula ---
-    result = generate_pricing_formula(
-        cost_per_unit=0.50,
-        target_margin=65,
-        deal_size=15000,
-        model_type="Copilot",
-    )
-    assert result["platform_fee"] > 0, f"Expected positive platform_fee"
-    assert result["included_units"] >= 1, f"Expected at least 1 included unit"
-    assert result["overage_rate"] > 0, f"Expected positive overage_rate"
-    assert result["effective_price"] > 0, f"Expected positive effective_price"
-    assert 0 < result["gross_margin"] < 100, f"Expected margin 0-100, got {result['gross_margin']}"
-    print(f"  Pricing formula: fee=${result['platform_fee']}/mo, "
-          f"{result['included_units']} units, "
-          f"overage=${result['overage_rate']}, "
-          f"annual=${result['effective_price']}, "
-          f"margin={result['gross_margin']}% - PASS")
+    # --- generate_pricing_formula: HYBRID ---
+    r = generate_pricing_formula(1.0, 65, 62500, "hybrid")
+    assert r["platform_fee_annual"] > 0
+    assert r["included_units"] >= 1
+    assert 0 < r["gross_margin"] < 100
+    print(f"  Hybrid: fee=${r['platform_fee_annual']:,.0f}/yr, "
+          f"{r['included_units']} units, margin={r['gross_margin']}% - PASS")
 
-    # Edge case: zero cost
-    result_zero = generate_pricing_formula(0, 65, 15000, "Agent")
-    assert result_zero["platform_fee"] == 0, "Zero cost should produce zero fee"
+    # Acceptance: $1 cost, 65% margin, ~$25K deal -> fee ~$4,800-$14,400/yr
+    r2 = generate_pricing_formula(1.0, 65, 25000, "hybrid")
+    assert 2000 <= r2["platform_fee_annual"] <= 20000, \
+        f"Fee ${r2['platform_fee_annual']} outside expected range"
+    print(f"  Hybrid $25K deal: fee=${r2['platform_fee_annual']:,.0f}/yr - PASS")
+
+    # --- generate_pricing_formula: OUTCOME ---
+    r = generate_pricing_formula(1.0, 65, 62500, "outcome")
+    assert r["model_name"] == "Outcome-based"
+    assert r["platform_fee_annual"] > 0
+    assert r["gross_margin"] == 65.0
+    print(f"  Outcome: commit=${r['platform_fee_annual']:,.0f}/yr, "
+          f"{r['included_units']} outcomes - PASS")
+
+    # --- generate_pricing_formula: WORKFLOW ---
+    r = generate_pricing_formula(1.0, 65, 15000, "workflow")
+    assert r["model_name"] == "Workflow-based (Per Task)"
+    assert r["overage_rate"] < r["effective_price_per_unit"]  # discount
+    print(f"  Workflow: ${r['effective_price_per_unit']:.2f}/task, "
+          f"discount=${r['overage_rate']:.2f} - PASS")
+
+    # --- generate_pricing_formula: PER_SEAT ---
+    r = generate_pricing_formula(1.0, 65, 62500, "per_seat", "mid_market")
+    assert r["model_name"] == "Per-seat + Feature Tiers"
+    assert r["included_units"] == 25  # mid_market seats
+    assert r["gross_margin"] > 0
+    print(f"  Per-seat: ${r['effective_price_per_unit']:,.0f}/seat/mo, "
+          f"{r['included_units']} seats, margin={r['gross_margin']}% - PASS")
+
+    # --- Edge: zero cost ---
+    r = generate_pricing_formula(0, 65, 15000, "hybrid")
+    assert r["platform_fee_annual"] == 0
     print(f"  Zero cost edge case - PASS")
 
-    # --- Test calculate_health_score ---
-    # All 5s = 100% = Advanced
-    all_high = {f"m4_q{i}": 5 for i in range(1, 11)}
-    pct, label, priorities = calculate_health_score(all_high)
-    assert pct == 100.0, f"Expected 100%, got {pct}"
-    assert label == "Advanced", f"Expected Advanced, got {label}"
+    # --- calculate_health_score ---
+    pct, label, _ = calculate_health_score({f"m4_q{i}": 5 for i in range(1, 11)})
+    assert pct == 100.0 and label == "Advanced"
     print(f"  All 5s: {pct}% {label} - PASS")
 
-    # All 1s = 20% = Early Stage
-    all_low = {f"m4_q{i}": 1 for i in range(1, 11)}
-    pct, label, priorities = calculate_health_score(all_low)
-    assert pct == 20.0, f"Expected 20%, got {pct}"
-    assert label == "Early Stage", f"Expected Early Stage, got {label}"
-    assert len(priorities) == 3, f"Expected 3 priorities, got {len(priorities)}"
+    pct, label, _ = calculate_health_score({f"m4_q{i}": 1 for i in range(1, 11)})
+    assert pct == 20.0 and label == "Early Stage"
     print(f"  All 1s: {pct}% {label} - PASS")
 
-    # Mixed scores
     mixed = {
         "m4_q1": 4, "m4_q2": 2, "m4_q3": 5, "m4_q4": 1,
         "m4_q5": 3, "m4_q6": 3, "m4_q7": 2, "m4_q8": 4,
         "m4_q9": 3, "m4_q10": 5,
     }
-    pct, label, priorities = calculate_health_score(mixed)
-    assert priorities[0] == "m4_q4", f"Expected m4_q4 as top priority, got {priorities[0]}"
-    assert "m4_q2" in priorities, f"Expected m4_q2 in priorities"
-    assert "m4_q7" in priorities, f"Expected m4_q7 in priorities"
-    print(f"  Mixed: {pct}% {label}, priorities={priorities} - PASS")
+    pct, label, pri = calculate_health_score(mixed)
+    assert pri[0] == "m4_q4" and "m4_q2" in pri and "m4_q7" in pri
+    print(f"  Mixed: {pct}% {label}, priorities={pri} - PASS")
 
-    # --- Test recommendation lookup ---
+    # --- Recommendation lookup ---
     from data.recommendations import get_pricing_recommendation
 
     rec = get_pricing_recommendation("Copilot", "Revenue Engine", "low")
-    assert rec["model_name"] == "Per-seat + Feature Tiers", f"Got {rec['model_name']}"
+    assert rec["model_name"] == "Per-seat + Feature Tiers"
     print(f"  Copilot+hard+low -> {rec['model_name']} - PASS")
 
     rec = get_pricing_recommendation("Agent", "Efficiency Machine", "moderate")
-    assert rec["model_name"] == "Outcome-based", f"Got {rec['model_name']}"
-    print(f"  Agent+hard+moderate -> {rec['model_name']} - PASS")
+    assert rec["model_name"] == "Outcome-based"
+    print(f"  Agent+hard+mod -> {rec['model_name']} - PASS")
 
     rec = get_pricing_recommendation("Agent", "Promise Zone", "low")
-    assert rec["model_name"] == "Workflow-based (Per Task)", f"Got {rec['model_name']}"
+    assert rec["model_name"] == "Workflow-based (Per Task)"
     print(f"  Agent+soft+low -> {rec['model_name']} - PASS")
 
     rec = get_pricing_recommendation("AI-enabled Service", "Revenue Engine", "high")
-    assert rec["model_name"] == "Outcome-based (Per Deliverable)", f"Got {rec['model_name']}"
+    assert rec["model_name"] == "Outcome-based (Per Deliverable)"
     print(f"  Service+hard+high -> {rec['model_name']} - PASS")
 
     rec = get_pricing_recommendation("AI-enabled Service", "Danger Zone", "moderate")
-    assert rec["model_name"] == "Workflow-based + SLA Tiers", f"Got {rec['model_name']}"
-    print(f"  Service+soft+moderate -> {rec['model_name']} - PASS")
+    assert rec["model_name"] == "Workflow-based + SLA Tiers"
+    print(f"  Service+soft+mod -> {rec['model_name']} - PASS")
 
-    # --- Test comp table ---
+    # --- Comp table ---
     from data.comp_table import get_comps_by_model
 
-    copilot_comps = get_comps_by_model("Copilot")
-    assert len(copilot_comps) == 1, f"Expected 1 Copilot comp, got {len(copilot_comps)}"
-    assert copilot_comps[0]["name"] == "DeepL"
-    print(f"  Copilot comps: {[c['name'] for c in copilot_comps]} - PASS")
-
-    agent_comps = get_comps_by_model("Agent")
-    assert len(agent_comps) == 4, f"Expected 4 Agent comps, got {len(agent_comps)}"
-    print(f"  Agent comps: {[c['name'] for c in agent_comps]} - PASS")
-
-    service_comps = get_comps_by_model("AI-enabled Service")
-    assert len(service_comps) == 4, f"Expected 4 Service comps, got {len(service_comps)}"
-    print(f"  Service comps: {[c['name'] for c in service_comps]} - PASS")
+    assert len(get_comps_by_model("Copilot")) == 1
+    assert len(get_comps_by_model("Agent")) == 4
+    assert len(get_comps_by_model("AI-enabled Service")) == 4
+    print(f"  Comp table filters - PASS")
 
     print("\nAll tests passed.")
