@@ -139,9 +139,10 @@ def _render_welcome():
         "to find blind spots in your pricing strategy."
     )
 
-    if st.button("Get Started \u2192", type="primary"):
+    def _go_to_classify():
         st.session_state.nav_module = "1. Classify Business"
-        st.rerun()
+
+    st.button("Get Started \u2192", type="primary", on_click=_go_to_classify)
 
 
 # ---------------------------------------------------------------------------
