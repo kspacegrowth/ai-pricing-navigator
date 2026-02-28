@@ -4,12 +4,28 @@ from modules.classifier import render_classifier
 from modules.value_mapper import render_value_mapper
 from modules.pricing_rec import render_pricing_rec
 from modules.health_check import render_health_check
-from modules.unit_economics import render_unit_economics
+from modules.unit_cost_calc import render_unit_cost_calc
+from modules.gross_margin_calc import render_gross_margin_calc
 
 st.set_page_config(
     page_title="AI Pricing Navigator",
     page_icon="\U0001f4b0",
     layout="wide",
+)
+
+# ---------------------------------------------------------------------------
+# Global font size overrides
+# ---------------------------------------------------------------------------
+st.markdown(
+    """
+    <style>
+    .stMarkdown, .stText, .stCaption { font-size: 1.1rem !important; }
+    .stCaption p, small, .stMarkdown small { font-size: 0.95rem !important; }
+    .stRadio label, .stCheckbox label, .stSlider label { font-size: 1.1rem !important; }
+    [data-testid="stMetricValue"] { font-size: 1.8rem !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------------------------
@@ -43,6 +59,7 @@ _NAV_OPTIONS = [
     "2. Map Value",
     "3. Pricing Model",
     "4. Health Check",
+    "\U0001f9ee Tools",
 ]
 
 # ---------------------------------------------------------------------------
@@ -80,13 +97,8 @@ with st.sidebar:
 
     st.divider()
 
-# Sidebar - unit economics calculator
-render_unit_economics()
-
 # Sidebar - about + footer
 with st.sidebar:
-    st.divider()
-
     with st.expander("About this tool"):
         st.markdown(
             "AI Pricing Navigator helps AI founders design their pricing "
@@ -100,7 +112,7 @@ with st.sidebar:
             "(https://www.bvp.com/atlas/the-ai-pricing-and-monetization-playbook)"
         )
 
-    st.markdown("[Built by K-Space](#)")
+    st.markdown("[Built by K-Space](https://kspacegrowth.com/)")
     st.caption(
         "Framework based on Bessemer Venture Partners\u2019 "
         "AI Pricing Playbook (2026)"
@@ -112,7 +124,7 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 def _render_welcome():
     st.title("AI Pricing Navigator")
-    st.markdown("### Design your AI pricing strategy in minutes - not months.")
+    st.markdown("### Design your AI pricing strategy in minutes.")
     st.markdown(
         "This tool walks you through a 3-step process to help you choose the "
         "right pricing model for your AI product. You\u2019ll classify your "
@@ -146,6 +158,19 @@ def _render_welcome():
 
 
 # ---------------------------------------------------------------------------
+# Tools page
+# ---------------------------------------------------------------------------
+def _render_tools():
+    st.title("Tools")
+    st.markdown("Calculators to help you nail your pricing numbers.")
+    tab1, tab2 = st.tabs(["Unit Cost Calculator", "Gross Margin Calculator"])
+    with tab1:
+        render_unit_cost_calc()
+    with tab2:
+        render_gross_margin_calc()
+
+
+# ---------------------------------------------------------------------------
 # Module routing
 # ---------------------------------------------------------------------------
 if module == "\U0001f3e0 Welcome":
@@ -158,12 +183,14 @@ elif module == "3. Pricing Model":
     render_pricing_rec()
 elif module == "4. Health Check":
     render_health_check()
+elif module == "\U0001f9ee Tools":
+    _render_tools()
 
 # ---------------------------------------------------------------------------
 # Main area footer
 # ---------------------------------------------------------------------------
 st.divider()
-st.caption("Built by K-Space | AI-powered business development tools")
+st.markdown("[Built by K-Space](https://kspacegrowth.com/) | AI-powered business development tools")
 st.caption(
     "Framework based on Bessemer Venture Partners\u2019 "
     "AI Pricing Playbook (2026)"

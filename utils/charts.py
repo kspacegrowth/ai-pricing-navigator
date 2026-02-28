@@ -61,23 +61,44 @@ def create_value_framework_chart(x_score, y_score):
         ),
     ]
 
-    # Quadrant label annotations
+    # Quadrant label annotations (name + one-line description)
+    _desc_color = "rgba(248, 250, 252, 0.5)"
     annotations = [
+        # Revenue Engine - top-right
         dict(
             x=0.85, y=1.15, text="Revenue Engine", showarrow=False,
-            font=dict(size=13, color="rgba(34, 197, 94, 0.85)"),
+            font=dict(size=16, color="rgba(34, 197, 94, 0.85)"),
         ),
+        dict(
+            x=0.85, y=1.0, text="Premium outcome-based pricing", showarrow=False,
+            font=dict(size=12, color=_desc_color),
+        ),
+        # Efficiency Machine - top-left
         dict(
             x=-0.85, y=1.15, text="Efficiency Machine", showarrow=False,
-            font=dict(size=13, color="rgba(59, 130, 246, 0.85)"),
+            font=dict(size=16, color="rgba(59, 130, 246, 0.85)"),
         ),
         dict(
-            x=0.85, y=-1.15, text="Promise Zone", showarrow=False,
-            font=dict(size=13, color="rgba(234, 179, 8, 0.85)"),
+            x=-0.85, y=1.0, text="Price against the alternative (TCO)", showarrow=False,
+            font=dict(size=12, color=_desc_color),
+        ),
+        # Promise Zone - bottom-right
+        dict(
+            x=0.85, y=-1.0, text="Promise Zone", showarrow=False,
+            font=dict(size=16, color="rgba(234, 179, 8, 0.85)"),
         ),
         dict(
-            x=-0.85, y=-1.15, text="Danger Zone", showarrow=False,
-            font=dict(size=13, color="rgba(239, 68, 68, 0.85)"),
+            x=0.85, y=-1.15, text="Hybrid pricing, must harden ROI over time",
+            showarrow=False, font=dict(size=12, color=_desc_color),
+        ),
+        # Danger Zone - bottom-left
+        dict(
+            x=-0.85, y=-1.0, text="Danger Zone", showarrow=False,
+            font=dict(size=16, color="rgba(239, 68, 68, 0.85)"),
+        ),
+        dict(
+            x=-0.85, y=-1.15, text="Highest renewal risk, prove value fast",
+            showarrow=False, font=dict(size=12, color=_desc_color),
         ),
     ]
 
@@ -86,15 +107,17 @@ def create_value_framework_chart(x_score, y_score):
         annotations=annotations,
         xaxis=dict(
             range=[-1.3, 1.3],
-            title="Cost Savings \u2190 \u2192 Revenue Uplift",
+            title=dict(text="Cost Savings \u2190 \u2192 Revenue Uplift", font=dict(size=14)),
             zeroline=False,
             showgrid=False,
+            tickfont=dict(size=12),
         ),
         yaxis=dict(
             range=[-1.3, 1.3],
-            title="Soft ROI \u2190 \u2192 Hard ROI",
+            title=dict(text="Soft ROI \u2190 \u2192 Hard ROI", font=dict(size=14)),
             zeroline=False,
             showgrid=False,
+            tickfont=dict(size=12),
         ),
         height=500,
         margin=dict(l=60, r=60, t=30, b=60),
@@ -136,9 +159,9 @@ def create_radar_chart(scores, labels):
                 visible=True,
                 range=[0, 5],
                 tickvals=[1, 2, 3, 4, 5],
-                tickfont=dict(size=10),
+                tickfont=dict(size=12),
             ),
-            angularaxis=dict(tickfont=dict(size=11)),
+            angularaxis=dict(tickfont=dict(size=13)),
             bgcolor="rgba(0,0,0,0)",
         ),
         showlegend=False,

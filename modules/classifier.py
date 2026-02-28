@@ -34,7 +34,8 @@ def render_classifier():
     st.header("What type of AI business are you building?")
     st.markdown(
         "Your AI business model determines which pricing structures make sense. "
-        "Answer these questions to classify your product."
+        "Answer these questions to classify your product. "
+        "Click through options to see real-world examples."
     )
 
     # ---- Questions --------------------------------------------------------
@@ -91,3 +92,15 @@ def _show_results():
         df = pd.DataFrame(comps).drop(columns=["model_type"])
         df.columns = ["Company", "Pricing Model", "Detail", "Value Driver"]
         st.dataframe(df, hide_index=True, use_container_width=True)
+
+    st.divider()
+    st.markdown("**Ready for the next step?**")
+
+    def _go_to_value():
+        st.session_state.nav_module = "2. Map Value"
+
+    st.button(
+        "Continue to Step 2: Map Value \u2192",
+        type="primary",
+        on_click=_go_to_value,
+    )

@@ -25,9 +25,10 @@ def _collect_answers():
 def render_value_mapper():
     st.header("Where does your product sit on the AI Value Framework?")
     st.markdown(
-        "This 2\u00d72 framework maps your pricing power and renewal risk. "
+        "This 2x2 framework maps your pricing power and renewal risk. "
         "Products with hard ROI and clear revenue impact command the "
-        "strongest pricing."
+        "strongest pricing. "
+        "Click through options to see real-world examples."
     )
 
     # ---- Progress summary -------------------------------------------------
@@ -100,3 +101,15 @@ def _show_results():
             "2025-era AI pilots hit their first renewal cycles. Consider: Can you "
             "move toward harder ROI by closing the loop on outcomes?"
         )
+
+    st.divider()
+    st.markdown("**Ready for the next step?**")
+
+    def _go_to_pricing():
+        st.session_state.nav_module = "3. Pricing Model"
+
+    st.button(
+        "Continue to Step 3: Pricing Model \u2192",
+        type="primary",
+        on_click=_go_to_pricing,
+    )
